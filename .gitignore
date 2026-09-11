@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+
+# Environment variables
+.env
+.env.local
+
+# Node
+node_modules/
+.next/
+out/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
