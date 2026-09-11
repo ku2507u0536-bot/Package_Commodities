@@ -1,0 +1,13 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run SIH rule-engine demo",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "SIH_project.test_engine",
+            "cwd": "${workspaceFolder}/..",
+            "console": "integratedTerminal"
+        }
+    ]
+}
