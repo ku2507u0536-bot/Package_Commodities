@@ -1,4 +1,5 @@
 import logging
+import cv2
 from typing import Dict, Any, List
 
 # Configure logger
