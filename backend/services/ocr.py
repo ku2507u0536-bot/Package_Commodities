@@ -62,69 +62,23 @@ def get_ocr_engine():
 
 
 def run_ocr(image_path: str) -> Dict[str, Any]:
-    """
-    Runs PaddleOCR on the specified image file path.
-    Returns detected text, line list, confidence scores, and line count.
-    """
-    if not PADDLE_AVAILABLE:
-        logger.error("PaddleOCR is not available.")
-        return {
-            "text": "",
-            "lines": [],
-            "details": [],
-            "total_lines_detected": 0,
-        }
-
+    """Runs PaddleOCR on the specified image file path with auto-resizing."""
     engine = get_ocr_engine()
     if engine is None:
-        logger.error("Could not obtain PaddleOCR engine.")
-        return {
-            "text": "",
-            "lines": [],
-            "details": [],
-            "total_lines_detected": 0,
-        }
+        return {"error": "PaddleOCR is not available"}
 
-    raw_results = list(engine.predict(image_path))
+    # Load and downscale image to prevent Render CPU timeouts
+    img = cv2.imread(image_path)
+    if img is None:
+        return {"error": "Could not read image file"}
 
-    detected_items: List[Dict[str, Any]] = []
-    full_text_lines: List[str] = []
+    h, w = img.shape[:2]
+    max_dim = 1000
 
-    for item in raw_results:
-        # PaddleOCR 3.x dict format
-        if isinstance(item, dict):
-            texts = item.get("rec_texts", [])
-            scores = item.get("rec_scores", [])
-            for text, score in zip(texts, scores):
-                text_str = str(text).strip()
-                score_val = float(score)
-                if text_str:
-                    full_text_lines.append(text_str)
-                    detected_items.append({
-                        "text": text_str,
-                        "confidence": round(score_val, 4)
-                    })
+    if max(h, w) > max_dim:
+        scale = max_dim / float(max(h, w))
+        img = cv2.resize(img, (int(w * scale), int(h * scale)), interpolation=cv2.INTER_AREA)
 
-        # Classic PaddleOCR 2.x list of tuples format fallback
-        elif isinstance(item, (list, tuple)):
-            for line in item:
-                if isinstance(line, (list, tuple)) and len(line) >= 2:
-                    text_info = line[1]
-                    if isinstance(text_info, (list, tuple)) and len(text_info) >= 2:
-                        text_str = str(text_info[0]).strip()
-                        score_val = float(text_info[1])
-                        if text_str:
-                            full_text_lines.append(text_str)
-                            detected_items.append({
-                                "text": text_str,
-                                "confidence": round(score_val, 4)
-                            })
-
-    full_text = "\n".join(full_text_lines)
-
-    return {
-        "text": full_text,
-        "lines": full_text_lines,
-        "details": detected_items,
-        "total_lines_detected": len(full_text_lines)
-    }
+    # Pass downscaled image array to PaddleOCR
+    results = engine.ocr(img, cls=False)
+    return {"results": results}
