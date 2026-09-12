@@ -81,5 +81,5 @@ def run_ocr(image_path: str) -> Dict[str, Any]:
         img = cv2.resize(img, (int(w * scale), int(h * scale)), interpolation=cv2.INTER_AREA)
 
     # Pass downscaled image array to PaddleOCR
-    results = engine.ocr(img, cls=False)
+   results = engine.ocr(img)
     return {"results": results}
