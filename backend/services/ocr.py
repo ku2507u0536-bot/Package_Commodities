@@ -53,12 +53,11 @@ def get_ocr_engine():
     if _ocr_engine is None:
         logger.info("Initializing PaddleOCR engine...")
         _ocr_engine = PaddleOCR(
-    lang="en",
-    use_angle_cls=False,
-    det_db_thresh=0.3,
-    det_db_box_thresh=0.6,
-    show_log=False
-)
+            lang="en",
+            use_angle_cls=False,
+            det_db_thresh=0.3,
+            det_db_box_thresh=0.6
+        )
     return _ocr_engine
 
 
